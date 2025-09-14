@@ -43,7 +43,6 @@ function parseNotamDate(dateString: string): Date | undefined {
   );
 }
 
-// TODO: Parse the other lat, long format
 /**
  * Parse WKT POINT format or array string to coordinates object
  *
@@ -205,7 +204,10 @@ function parseText(text: string): string {
 }
 
 /**
- * Transform raw FAA API response data into standardized Notam format
+ * Transform FAA NOTAM data to standard Notam format
+ *
+ * @param notam - Raw FAA NOTAM data object
+ * @returns Transformed Notam object
  */
 function transformNotamData(notam: any): Notam {
   return {
@@ -229,6 +231,11 @@ function transformNotamData(notam: any): Notam {
 
 /**
  * Core API request function
+ *
+ * @param uri - API endpoint URI
+ * @param options - Fetch options
+ * @param fetcher - Custom fetch function
+ * @returns Promise resolving to an array of NOTAM objects
  */
 async function baseApi(
   uri: string,
@@ -245,19 +252,16 @@ async function baseApi(
   };
 
   try {
-    // TODO: Map the return type
     const response = await fetchApi(fetcher, `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (!response.ok) {
       throw new Error(`FAA NOTAM API request failed with status: ${response.status}`);
     }
 
     const data = await response.json() as any;
-
     if (data && data.notamList && Array.isArray(data.notamList)) {
       if (data.notamList.length === 0) {
         return [];
       }
-      console.log(data.notamList);
       return data.notamList.map(transformNotamData);
     }
 
@@ -267,7 +271,6 @@ async function baseApi(
 
     return [];
   } catch (error) {
-    console.error('FAA NOTAM API error:', error);
     throw new ApiError('FAA NOTAM API', FAA_API_CONFIG.API_URL, apiOptions, error);
   }
 }
@@ -304,10 +307,3 @@ export async function getFAANotamsByTransactionId(transactionId: string, options
   return baseApi(`details&transactionid=${transactionId}`, {}, fetcher);
 }
 
-// Convenience function that creates a simple API object (for those who prefer object-style APIs)
-export function createFAANotamAPI(options: FAANotamOptions = {}) {
-  return {
-    getIcao: (icao: ICAO) => getFAANotamsByIcao(icao, options),
-    getTransactionId: (transactionId: string) => getFAANotamsByTransactionId(transactionId, options),
-  };
-}
