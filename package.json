@@ -1,0 +1,45 @@
+{
+  "name": "byteflight-aviation-api",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "type": "module",
+  "author": "Yorick de Wid <ydewid@gmail.com>",
+  "license": "MIT",
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "test": "npx tsx test-functional.ts",
+    "build": "tsc"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./aviationweather": {
+      "import": "./dist/aviationweather.js",
+      "types": "./dist/aviationweather.d.ts"
+    },
+    "./openaip": {
+      "import": "./dist/openaip.js",
+      "types": "./dist/openaip.d.ts"
+    },
+    "./faa-notam": {
+      "import": "./dist/faa-notam.js",
+      "types": "./dist/faa-notam.d.ts"
+    },
+    "./error": {
+      "import": "./dist/error.js",
+      "types": "./dist/error.d.ts"
+    }
+  },
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "flight-planner": "github:yorickdewid/flight-planner"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
