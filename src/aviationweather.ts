@@ -85,3 +85,15 @@ export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, options: MetarO
   ];
   return baseApi(`metar?bbox=${bboxReversed.join(',')}&format=json&taf=true`, {}, fetcher);
 }
+
+/** Factory function to create a METAR station provider.
+ *
+ * @param options - Optional configuration options including a custom fetcher.
+ * @returns An object with methods to get METAR data by ICAO codes or bounding box.
+ */
+export default function metarStationProvider(options: MetarOptions = {}) {
+  return {
+    getByIcao: (icao: ICAO[]) => getMetarStationsByIcao(icao, options),
+    getByBbox: (bbox: GeoJSON.BBox) => getMetarStationsByBbox(bbox, options)
+  };
+}
