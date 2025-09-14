@@ -61,7 +61,7 @@ async function baseApi(
  * @param icao - Array of ICAO airport codes.
  * @returns Promise resolving to an array of MetarStation objects.
  */
-export async function getIcao(icao: ICAO[], options: MetarOptions = {}): Promise<MetarStation[]> {
+export async function getMetarStationsByIcao(icao: ICAO[], options: MetarOptions = {}): Promise<MetarStation[]> {
   const { fetcher = fetch } = options;
   if (!icao.length) {
     return Promise.resolve([]);
@@ -75,7 +75,7 @@ export async function getIcao(icao: ICAO[], options: MetarOptions = {}): Promise
  * @param bbox - GeoJSON bounding box [west, south, east, north].
  * @returns Promise resolving to an array of MetarStation objects.
  */
-export async function getBbox(bbox: GeoJSON.BBox, options: MetarOptions = {}): Promise<MetarStation[]> {
+export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, options: MetarOptions = {}): Promise<MetarStation[]> {
   const { fetcher = fetch } = options;
   const bboxReversed = [
     parseFloat(bbox[1].toFixed(2)), // south
