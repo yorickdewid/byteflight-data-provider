@@ -1,5 +1,5 @@
 {
-	"name": "ByteFlight Aviation API Dev Container",
+	"name": "ByteFlight Data Provider Dev Container",
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/git:1": {
