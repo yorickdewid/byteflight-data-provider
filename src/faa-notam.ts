@@ -282,7 +282,7 @@ async function baseApi(
  * @param options - Optional configuration including custom fetcher
  * @returns Promise resolving to an array of NOTAM objects.
  */
-export async function getFAANotamsByIcao(icao: ICAO, options: FAANotamOptions = {}): Promise<Notam[]> {
+export async function getNotamsByIcao(icao: ICAO, options: FAANotamOptions = {}): Promise<Notam[]> {
   const { fetcher = fetch } = options;
   const formData = `searchType=0&designatorsForLocation=${icao}&radius=10&sortColumns=5+false&sortDirection=true&offset=0`;
 
@@ -302,8 +302,20 @@ export async function getFAANotamsByIcao(icao: ICAO, options: FAANotamOptions = 
  * @param options - Optional configuration including custom fetcher
  * @returns Promise resolving to an array of NOTAM objects.
  */
-export async function getFAANotamsByTransactionId(transactionId: string, options: FAANotamOptions = {}): Promise<Notam[]> {
+export async function getNotamsByTransactionId(transactionId: string, options: FAANotamOptions = {}): Promise<Notam[]> {
   const { fetcher = fetch } = options;
   return baseApi(`details&transactionid=${transactionId}`, {}, fetcher);
 }
 
+/**
+ * FAA NOTAM Provider
+ *
+ * @param options - Optional configuration including custom fetcher
+ * @returns Object with methods to get NOTAMs by ICAO or transaction ID
+ */
+export default function notamProvider(options: FAANotamOptions = {}) {
+  return {
+    getByIcao: (icao: ICAO) => getNotamsByIcao(icao, options),
+    getByTransactionId: (transactionId: string) => getNotamsByTransactionId(transactionId, options),
+  };
+}
