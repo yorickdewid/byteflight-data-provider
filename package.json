@@ -8,7 +8,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.11.0",
   "scripts": {
-    "test": "npx tsx test-functional.ts",
+    "test": "npx tsx test.ts",
     "build": "tsc"
   },
   "exports": {
@@ -38,7 +38,7 @@
     "flight-planner": "github:yorickdewid/flight-planner"
   },
   "devDependencies": {
-    "@types/node": "^24.3.3",
+    "@types/node": "^24.5.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
