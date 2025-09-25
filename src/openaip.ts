@@ -53,6 +53,7 @@ async function baseApi(
   try {
     const response = await fetchApi(fetcher, `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (!response.ok) {
+      await response.body?.cancel();
       throw new Error(`OpenAIP API request failed with status: ${response.status}`);
     }
 

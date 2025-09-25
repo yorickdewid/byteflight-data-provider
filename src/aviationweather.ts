@@ -36,6 +36,7 @@ async function baseApi(
   try {
     const response = await fetchApi(fetcher, `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (!response.ok) {
+      await response.body?.cancel();
       throw new Error(`METAR API request failed with status: ${response.status}`);
     }
 
