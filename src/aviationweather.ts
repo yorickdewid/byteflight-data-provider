@@ -60,23 +60,26 @@ async function baseApi(
  * Get METAR information for specific ICAO codes.
  *
  * @param icao - Array of ICAO airport codes.
+ * @param date - Optional date to fetch METARs for a specific time.
  * @returns Promise resolving to an array of MetarStation objects.
  */
-export async function getMetarStationsByIcao(icao: ICAO[], options: MetarOptions = {}): Promise<MetarStation[]> {
+export async function getMetarStationsByIcao(icao: ICAO[], date?: Date, options: MetarOptions = {}): Promise<MetarStation[]> {
   const { fetcher = fetch } = options;
   if (!icao.length) {
     return Promise.resolve([]);
   }
-  return baseApi(`metar?ids=${icao.map(normalizeICAO).join(',')}&format=json&taf=true`, {}, fetcher);
+  const dateParam = date ? `&date=${date.toISOString()}` : '';
+  return baseApi(`metar?ids=${icao.map(normalizeICAO).join(',')}&format=json&taf=true${dateParam}`, {}, fetcher);
 }
 
 /**
  * Get METAR information for airports within a bounding box.
  *
  * @param bbox - GeoJSON bounding box [west, south, east, north].
+ * @param date - Optional date to fetch METARs for a specific time.
  * @returns Promise resolving to an array of MetarStation objects.
  */
-export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, options: MetarOptions = {}): Promise<MetarStation[]> {
+export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, date?: Date, options: MetarOptions = {}): Promise<MetarStation[]> {
   const { fetcher = fetch } = options;
   const bboxReversed = [
     parseFloat(bbox[1].toFixed(2)), // south
@@ -84,7 +87,8 @@ export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, options: MetarO
     parseFloat(bbox[3].toFixed(2)), // north
     parseFloat(bbox[2].toFixed(2))  // east
   ];
-  return baseApi(`metar?bbox=${bboxReversed.join(',')}&format=json&taf=true`, {}, fetcher);
+  const dateParam = date ? `&date=${date.toISOString()}` : '';
+  return baseApi(`metar?bbox=${bboxReversed.join(',')}&format=json&taf=true${dateParam}`, {}, fetcher);
 }
 
 /** Factory function to create a METAR station provider.
@@ -94,7 +98,7 @@ export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, options: MetarO
  */
 export default function metarStationProvider(options: MetarOptions = {}) {
   return {
-    getByIcao: (icao: ICAO[]) => getMetarStationsByIcao(icao, options),
-    getByBbox: (bbox: GeoJSON.BBox) => getMetarStationsByBbox(bbox, options)
+    getByIcao: (icao: ICAO[], date?: Date) => getMetarStationsByIcao(icao, date, options),
+    getByBbox: (bbox: GeoJSON.BBox, date?: Date) => getMetarStationsByBbox(bbox, date, options)
   };
 }
