@@ -1,5 +1,5 @@
 {
-  "name": "byteflight-data-provider",
+  "name": "@byteflight/data-provider",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
@@ -11,15 +11,15 @@
     "build": "tsc"
   },
   "exports": {
-    "./aviationweather": {
+    "./weather": {
       "import": "./dist/aviationweather.js",
       "types": "./dist/aviationweather.d.ts"
     },
-    "./openaip": {
+    "./aerodrome": {
       "import": "./dist/openaip.js",
       "types": "./dist/openaip.d.ts"
     },
-    "./faa-notam": {
+    "./notam": {
       "import": "./dist/faa-notam.js",
       "types": "./dist/faa-notam.d.ts"
     },
