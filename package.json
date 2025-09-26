@@ -10,9 +10,11 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "test": "npx tsx test.ts",
     "build": "tsc",
-    "prepare": "pnpm run build"
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm run build",
+    "dev": "pnpm run build:watch"
   },
   "exports": {
     ".": {
