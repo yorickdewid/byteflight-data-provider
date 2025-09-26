@@ -16,6 +16,9 @@
     "prepare": "pnpm run build",
     "dev": "pnpm run build:watch"
   },
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
