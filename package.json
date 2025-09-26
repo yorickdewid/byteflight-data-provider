@@ -11,6 +11,10 @@
     "build": "tsc"
   },
   "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
     "./weather": {
       "import": "./dist/aviationweather.js",
       "types": "./dist/aviationweather.d.ts"
