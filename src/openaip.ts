@@ -153,7 +153,7 @@ export async function getAerodromeByRadius(
  */
 export default function aerodromeProvider(options: OpenAipOptions) {
   return {
-    getAerodromeByIcao: (icao: ICAO) => getAerodromeByIcao(icao, options),
-    getAerodromeByRadius: (location: GeoJSON.Position, distance?: number) => getAerodromeByRadius(location, distance, options)
+    getByIcao: (icao: ICAO) => getAerodromeByIcao(icao, options),
+    getByRadius: (location: GeoJSON.Position, distance?: number) => getAerodromeByRadius(location, distance, options)
   };
 }
