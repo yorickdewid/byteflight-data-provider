@@ -46,8 +46,12 @@
     "flight-planner": "github:yorickdewid/flight-planner"
   },
   "devDependencies": {
+    "@eslint/js": "^9.36.0",
     "@types/node": "^24.5.2",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.2"
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1"
   }
 }
