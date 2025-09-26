@@ -6,6 +6,9 @@
   "type": "module",
   "author": "Yorick de Wid <ydewid@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "test": "npx tsx test.ts",
     "build": "tsc",
