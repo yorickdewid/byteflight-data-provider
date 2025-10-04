@@ -19,7 +19,6 @@ export const fetchApi = async (
 ): Promise<Response> => {
   const { timeout, ...standardFetcherOptions } = options;
 
-  // Set defaults if not provided
   const headers = {
     'User-Agent': DEFAULT_USER_AGENT,
     ...standardFetcherOptions.headers

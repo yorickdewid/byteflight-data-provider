@@ -12,6 +12,11 @@ export interface MetarOptions {
   fetcher?: FetchFunction;
 }
 
+export interface MetarStationProvider {
+  getByIcao(icao: ICAO[], date?: Date): Promise<MetarStation[]>;
+  getByBbox(bbox: GeoJSON.BBox, date?: Date): Promise<MetarStation[]>;
+}
+
 /**
  * Base API function for fetching METAR data.
  *
@@ -40,7 +45,7 @@ async function baseApi(
       throw new Error(`METAR API request failed with status: ${response.status}`);
     }
 
-    const data = await response.json() as any[];
+    const data = await response.json() as unknown[];
     if (!data || data.length === 0) {
       return [];
     }
@@ -96,7 +101,7 @@ export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, date?: Date, op
  * @param options - Optional configuration options including a custom fetcher.
  * @returns An object with methods to get METAR data by ICAO codes or bounding box.
  */
-export default function metarStationProvider(options: MetarOptions = {}) {
+export default function metarStationProvider(options: MetarOptions = {}): MetarStationProvider {
   return {
     getByIcao: (icao: ICAO[], date?: Date) => getMetarStationsByIcao(icao, date, options),
     getByBbox: (bbox: GeoJSON.BBox, date?: Date) => getMetarStationsByBbox(bbox, date, options)

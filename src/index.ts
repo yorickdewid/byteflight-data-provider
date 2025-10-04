@@ -1,4 +1,3 @@
-// NOTAM Provider
 export {
   default as notamProvider,
   getNotamsByIcao,
@@ -6,7 +5,6 @@ export {
   type FAANotamOptions
 } from "./faa-notam.js";
 
-// METAR Provider
 export {
   default as metarProvider,
   getMetarStationsByIcao,
@@ -14,7 +12,6 @@ export {
   type MetarOptions
 } from "./aviationweather.js";
 
-// Aerodrome Provider
 export {
   default as aerodromeProvider,
   getAerodromeByIcao,

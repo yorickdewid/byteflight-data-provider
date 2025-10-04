@@ -12,6 +12,11 @@ export interface FAANotamOptions {
   fetcher?: FetchFunction;
 }
 
+export interface NotamProvider {
+  getByIcao(icao: ICAO): Promise<Notam[]>;
+  getByTransactionId(transactionId: string): Promise<Notam[]>;
+}
+
 // TODO: We need to parse timezones properly
 /**
  * Parse NOTAM date format (MM/DD/YYYY HHMM) to Date object
@@ -314,7 +319,7 @@ export async function getNotamsByTransactionId(transactionId: string, options: F
  * @param options - Optional configuration including custom fetcher
  * @returns Object with methods to get NOTAMs by ICAO or transaction ID
  */
-export default function notamProvider(options: FAANotamOptions = {}) {
+export default function notamProvider(options: FAANotamOptions = {}): NotamProvider {
   return {
     getByIcao: (icao: ICAO) => getNotamsByIcao(icao, options),
     getByTransactionId: (transactionId: string) => getNotamsByTransactionId(transactionId, options),

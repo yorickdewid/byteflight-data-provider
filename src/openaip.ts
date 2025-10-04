@@ -22,6 +22,11 @@ export interface OpenAipOptions {
   fetcher?: FetchFunction;
 }
 
+export interface AerodromeProvider {
+  getByIcao(icao: ICAO): Promise<Aerodrome[]>;
+  getByRadius(location: GeoJSON.Position, distance?: number): Promise<Aerodrome[]>;
+}
+
 /**
  * Base API function for fetching OpenAIP data.
  *
@@ -151,7 +156,7 @@ export async function getAerodromeByRadius(
  * @param options - Configuration options including API key and optional custom fetcher.
  * @returns An object with methods to fetch aerodrome data by ICAO code or radius.
  */
-export default function aerodromeProvider(options: OpenAipOptions) {
+export default function aerodromeProvider(options: OpenAipOptions): AerodromeProvider {
   return {
     getByIcao: (icao: ICAO) => getAerodromeByIcao(icao, options),
     getByRadius: (location: GeoJSON.Position, distance?: number) => getAerodromeByRadius(location, distance, options)
