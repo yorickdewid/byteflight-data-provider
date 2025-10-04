@@ -24,6 +24,7 @@ export interface OpenAipOptions {
 
 export interface AerodromeProvider {
   getByIcao(icao: ICAO): Promise<Aerodrome[]>;
+  getByIata(iata: string): Promise<Aerodrome[]>;
   getByRadius(location: GeoJSON.Position, distance?: number): Promise<Aerodrome[]>;
 }
 
@@ -120,6 +121,17 @@ export async function getAerodromeByIcao(icao: ICAO, options: OpenAipOptions): P
 }
 
 /**
+ * Get aerodrome information for a specific IATA code.
+ *
+ * @param iata - IATA airport code.
+ * @returns Promise resolving to an array of Aerodrome objects.
+ */
+export async function getAerodromeByIata(iata: string, options: OpenAipOptions): Promise<Aerodrome[]> {
+  const { fetcher = fetch, apiKey } = options;
+  return baseApi(`airports?search=${iata}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
+}
+
+/**
  * Get aerodrome information for airports within a radius from a location.
  *
  * @param location - GeoJSON Position [longitude, latitude].
@@ -159,6 +171,7 @@ export async function getAerodromeByRadius(
 export default function aerodromeProvider(options: OpenAipOptions): AerodromeProvider {
   return {
     getByIcao: (icao: ICAO) => getAerodromeByIcao(icao, options),
+    getByIata: (iata: string) => getAerodromeByIata(iata, options),
     getByRadius: (location: GeoJSON.Position, distance?: number) => getAerodromeByRadius(location, distance, options)
   };
 }
