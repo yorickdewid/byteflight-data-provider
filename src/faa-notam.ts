@@ -263,6 +263,12 @@ async function baseApi(
       throw new Error(`FAA NOTAM API request failed with status: ${response.status}`);
     }
 
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      await response.body?.cancel();
+      throw new Error(`FAA NOTAM API returned non-JSON response: ${contentType}`);
+    }
+
     const data = await response.json() as any;
     if (data && data.notamList && Array.isArray(data.notamList)) {
       if (data.notamList.length === 0) {
