@@ -310,7 +310,7 @@ export async function getNotamsByIcao(icao: ICAO, options: FAANotamOptions = {})
  */
 export async function getNotamsByTransactionId(transactionId: number, options: FAANotamOptions = {}): Promise<Notam | null> {
   const { fetcher = fetch } = options;
-  const notams = await baseApi(`details&transactionid=${transactionId}`, {}, fetcher);
+  const notams = await baseApi(`details?transactionid=${transactionId}`, {}, fetcher);
   return notams.length > 0 ? notams[0] : null;
 }
 
