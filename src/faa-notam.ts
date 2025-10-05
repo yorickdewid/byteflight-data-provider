@@ -14,7 +14,7 @@ export interface FAANotamOptions {
 
 export interface NotamProvider {
   getByIcao(icao: ICAO): Promise<Notam[]>;
-  getByTransactionId(transactionId: string): Promise<Notam[]>;
+  getByTransactionId(transactionId: string): Promise<Notam | null>;
 }
 
 // TODO: We need to parse timezones properly
@@ -302,15 +302,16 @@ export async function getNotamsByIcao(icao: ICAO, options: FAANotamOptions = {})
 }
 
 /**
- * Get NOTAMs for a specific transaction ID.
+ * Get NOTAM for a specific transaction ID.
  *
  * @param transactionId - NOTAM transaction ID.
  * @param options - Optional configuration including custom fetcher
- * @returns Promise resolving to an array of NOTAM objects.
+ * @returns Promise resolving to a single NOTAM object or null if not found.
  */
-export async function getNotamsByTransactionId(transactionId: string, options: FAANotamOptions = {}): Promise<Notam[]> {
+export async function getNotamsByTransactionId(transactionId: string, options: FAANotamOptions = {}): Promise<Notam | null> {
   const { fetcher = fetch } = options;
-  return baseApi(`details&transactionid=${transactionId}`, {}, fetcher);
+  const notams = await baseApi(`details&transactionid=${transactionId}`, {}, fetcher);
+  return notams.length > 0 ? notams[0] : null;
 }
 
 /**
