@@ -277,7 +277,7 @@ async function baseApi(
 
     return [];
   } catch (error) {
-    throw new ApiError('FAA NOTAM API', FAA_API_CONFIG.API_URL, apiOptions, error);
+    throw new ApiError('FAA NOTAM API', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, error);
   }
 }
 
