@@ -5,7 +5,7 @@ export class ApiError extends Error {
     public readonly requestOptions?: RequestInit & { timeout?: number; cf?: object },
     public readonly cause?: unknown
   ) {
-    const message = `${serviceName} API request failed for endpoint: ${endpoint}`;
+    const message = `${serviceName}: API request failed for endpoint: ${endpoint}`;
     super(message);
     this.name = 'ApiError';
   }

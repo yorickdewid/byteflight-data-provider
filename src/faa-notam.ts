@@ -260,13 +260,13 @@ async function baseApi(
     const response = await fetchApi(fetcher, `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (!response.ok) {
       await response.body?.cancel();
-      throw new Error(`FAA NOTAM API request failed with status: ${response.status}`);
+      throw new Error(`Request failed with status: ${response.status}`);
     }
 
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       await response.body?.cancel();
-      throw new Error(`FAA NOTAM API returned non-JSON response: ${contentType}`);
+      throw new Error(`Returned non-JSON response: ${contentType}`);
     }
 
     const data = await response.json() as any;
@@ -283,7 +283,7 @@ async function baseApi(
 
     return [];
   } catch (error) {
-    throw new ApiError('FAA NOTAM API', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, error);
+    throw new ApiError('FAA NOTAM', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, error);
   }
 }
 
