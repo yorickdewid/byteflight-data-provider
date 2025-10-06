@@ -1,4 +1,4 @@
-import { ICAO, Notam, NotamType, NotamScope, NotamPriority } from "flight-planner";
+import { ICAO, Notam, NotamType, NotamScope, NotamPriority, normalizeICAO, isICAO } from "flight-planner";
 import { ApiError } from "./error.js";
 import { fetchApi, type FetchFunction } from "./http.js";
 
@@ -217,12 +217,12 @@ function parseText(text: string): string {
 function transformNotamData(notam: any): Notam {
   return {
     id: notam.notamNumber || '',
-    icao: notam.icaoId || undefined,
+    icao: isICAO(notam.icaoId) ? normalizeICAO(notam.icaoId) : undefined,
     type: NotamType.A, // FAA NOTAMs are typically all "A" type
     scope: NotamScope.A, // Assume all are "A" scope for simplicity
     priority: NotamPriority.NORMAL, // Default to normal priority
     subject: '', // FAA NOTAMs do not have a distinct subject field
-    text: parseText(notam.traditionalMessageFrom4thWord || notam.traditionalMessage || ''),
+    text: parseText(notam.traditionalMessageFrom4thWord || notam.traditionalMessage || notam.icaoMessage),
     coordinates: notam.notamGeometry ? parsePoint(notam.notamGeometry) : notam.mapPointer ? parsePoint(notam.mapPointer) : undefined,
     schedule: {
       effectiveFrom: parseNotamDate(notam.startDate) || new Date(),
