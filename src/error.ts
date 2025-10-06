@@ -20,10 +20,6 @@ export class ApiError extends Error {
       details += `\nMethod: ${this.requestOptions.method}`;
     }
 
-    if (this.requestOptions?.timeout) {
-      details += `\nTimeout: ${this.requestOptions.timeout}ms`;
-    }
-
     if (this.cause) {
       details += `\nCause: ${this.cause instanceof Error ? this.cause.message : String(this.cause)}`;
     }
