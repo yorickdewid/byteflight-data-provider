@@ -60,7 +60,7 @@ async function baseApi(
     const response = await fetchApi(fetcher, `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (!response.ok) {
       await response.body?.cancel();
-      throw new Error(`OpenAIP API request failed with status: ${response.status}`);
+      throw new Error(`Request failed with status: ${response.status}`);
     }
 
     const data = await response.json() as any;
@@ -105,7 +105,7 @@ async function baseApi(
       };
     });
   } catch (error) {
-    throw new ApiError('OpenAIP API', `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions, error);
+    throw new ApiError('OpenAIP', `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions, error);
   }
 }
 

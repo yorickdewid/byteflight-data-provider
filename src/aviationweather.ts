@@ -42,7 +42,7 @@ async function baseApi(
     const response = await fetchApi(fetcher, `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (!response.ok) {
       await response.body?.cancel();
-      throw new Error(`METAR API request failed with status: ${response.status}`);
+      throw new Error(`Request failed with status: ${response.status}`);
     }
 
     const data = await response.json() as unknown[];
@@ -57,7 +57,7 @@ async function baseApi(
       coords: [metar.lon, metar.lat]
     }));
   } catch (error) {
-    throw new ApiError('METAR API', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, error);
+    throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, error);
   }
 }
 
