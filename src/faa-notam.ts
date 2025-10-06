@@ -265,8 +265,8 @@ async function baseApi(
 
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      await response.body?.cancel();
-      throw new Error(`Returned non-JSON response: ${contentType}`);
+      const body = await response.text();
+      throw new Error(`Returned non-JSON response: ${contentType}, body: ${body}`);
     }
 
     const data = await response.json() as any;
