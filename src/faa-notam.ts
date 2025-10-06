@@ -15,6 +15,8 @@ export interface FAANotamOptions {
 export interface NotamProvider {
   getByIcao(icao: ICAO): Promise<Notam[]>;
   getByTransactionId(transactionId: number): Promise<Notam | null>;
+  getRawByIcao(icao: ICAO): Promise<any[]>;
+  getRawByTransactionId(transactionId: number): Promise<any>;
 }
 
 // TODO: We need to parse timezones properly
@@ -222,7 +224,7 @@ function transformNotamData(notam: any): Notam {
     scope: NotamScope.A, // Assume all are "A" scope for simplicity
     priority: NotamPriority.NORMAL, // Default to normal priority
     subject: '', // FAA NOTAMs do not have a distinct subject field
-    text: parseText(notam.traditionalMessageFrom4thWord || notam.traditionalMessage || notam.icaoMessage),
+    text: parseText(notam.traditionalMessageFrom4thWord || notam.traditionalMessage || notam.icaoMessage), // TODO: Rename to message. Make optional in interface
     coordinates: notam.notamGeometry ? parsePoint(notam.notamGeometry) : notam.mapPointer ? parsePoint(notam.mapPointer) : undefined,
     schedule: {
       effectiveFrom: parseNotamDate(notam.startDate) || new Date(),
@@ -235,18 +237,18 @@ function transformNotamData(notam: any): Notam {
 }
 
 /**
- * Core API request function
+ * Core API request function for raw data
  *
  * @param uri - API endpoint URI
  * @param options - Fetch options
  * @param fetcher - Custom fetch function
- * @returns Promise resolving to an array of NOTAM objects
+ * @returns Promise resolving to raw API response data
  */
-async function baseApi(
+async function baseApiRaw(
   uri: string,
   options: RequestInit = {},
   fetcher: FetchFunction = fetch
-): Promise<Notam[]> {
+): Promise<any> {
   const apiOptions: RequestInit & { timeout?: number; cf?: object } = {
     ...options,
     cf: {
@@ -269,22 +271,39 @@ async function baseApi(
       throw new Error(`Returned non-JSON response: ${contentType}, body: ${body}`);
     }
 
-    const data = await response.json() as any;
-    if (data && data.notamList && Array.isArray(data.notamList)) {
-      if (data.notamList.length === 0) {
-        return [];
-      }
-      return data.notamList.map(transformNotamData);
-    }
-
-    if (data && (data.icaoMessage || data.traditionalMessageFrom4thWord || data.traditionalMessage)) {
-      return [transformNotamData(data)];
-    }
-
-    return [];
+    return await response.json();
   } catch (error) {
     throw new ApiError('FAA NOTAM', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, error);
   }
+}
+
+/**
+ * Core API request function
+ *
+ * @param uri - API endpoint URI
+ * @param options - Fetch options
+ * @param fetcher - Custom fetch function
+ * @returns Promise resolving to an array of NOTAM objects
+ */
+async function baseApi(
+  uri: string,
+  options: RequestInit = {},
+  fetcher: FetchFunction = fetch
+): Promise<Notam[]> {
+  const data = await baseApiRaw(uri, options, fetcher);
+
+  if (data && data.notamList && Array.isArray(data.notamList)) {
+    if (data.notamList.length === 0) {
+      return [];
+    }
+    return data.notamList.map(transformNotamData);
+  }
+
+  if (data && (data.icaoMessage || data.traditionalMessageFrom4thWord || data.traditionalMessage)) {
+    return [transformNotamData(data)];
+  }
+
+  return [];
 }
 
 /**
@@ -321,6 +340,58 @@ export async function getNotamsByTransactionId(transactionId: number, options: F
 }
 
 /**
+ * Get raw NOTAMs for a specific ICAO code without transformation.
+ *
+ * @param icao - ICAO airport code.
+ * @param options - Optional configuration including custom fetcher
+ * @returns Promise resolving to an array of raw NOTAM objects.
+ */
+export async function getRawNotamsByIcao(icao: ICAO, options: FAANotamOptions = {}): Promise<any[]> {
+  const { fetcher = fetch } = options;
+  const formData = `searchType=0&designatorsForLocation=${icao}&radius=10&sortColumns=5+false&sortDirection=true&offset=0`;
+
+  const data = await baseApiRaw('search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData,
+  }, fetcher);
+
+  if (data && data.notamList && Array.isArray(data.notamList)) {
+    return data.notamList;
+  }
+
+  if (data && (data.icaoMessage || data.traditionalMessageFrom4thWord || data.traditionalMessage)) {
+    return [data];
+  }
+
+  return [];
+}
+
+/**
+ * Get raw NOTAM for a specific transaction ID without transformation.
+ *
+ * @param transactionId - NOTAM transaction ID.
+ * @param options - Optional configuration including custom fetcher
+ * @returns Promise resolving to raw NOTAM data or null if not found.
+ */
+export async function getRawNotamsByTransactionId(transactionId: number, options: FAANotamOptions = {}): Promise<any> {
+  const { fetcher = fetch } = options;
+  const data = await baseApiRaw(`details?transactionid=${transactionId}`, {}, fetcher);
+
+  if (data && data.notamList && Array.isArray(data.notamList)) {
+    return data.notamList.length > 0 ? data.notamList[0] : null;
+  }
+
+  if (data && (data.icaoMessage || data.traditionalMessageFrom4thWord || data.traditionalMessage)) {
+    return data;
+  }
+
+  return null;
+}
+
+/**
  * FAA NOTAM Provider
  *
  * @param options - Optional configuration including custom fetcher
@@ -330,5 +401,7 @@ export default function notamProvider(options: FAANotamOptions = {}): NotamProvi
   return {
     getByIcao: (icao: ICAO) => getNotamsByIcao(icao, options),
     getByTransactionId: (transactionId: number) => getNotamsByTransactionId(transactionId, options),
+    getRawByIcao: (icao: ICAO) => getRawNotamsByIcao(icao, options),
+    getRawByTransactionId: (transactionId: number) => getRawNotamsByTransactionId(transactionId, options),
   };
 }
