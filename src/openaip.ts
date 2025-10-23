@@ -2,7 +2,6 @@ import { isICAO, normalizeIATA, normalizeICAO, validateFrequencyType, WaypointVa
 import { fetchApi, type FetchFunction } from "./http.js";
 import { capitalizeWords } from "flight-planner/utils";
 import { ApiError } from "./error.js";
-import { point } from "@turf/turf";
 
 const OPENAIP_API_CONFIG = {
   API_URL: 'https://api.core.openaip.net/api/',
@@ -92,10 +91,10 @@ async function baseApi(
       const elevation = (aerodrome.elevation && aerodrome.elevation.unit === 0 && aerodrome.elevation.referenceDatum === 1) ? aerodrome.elevation.value * OPENAIP_API_CONFIG.METERS_TO_FEET : undefined;
 
       return {
-        ICAO: normalizeICAO(aerodrome.icaoCode),
-        IATA: aerodrome.iataCode ? normalizeIATA(aerodrome.iataCode) : undefined,
+        icao: normalizeICAO(aerodrome.icaoCode),
+        iata: aerodrome.iataCode ? normalizeIATA(aerodrome.iataCode) : undefined,
         name: capitalizeWords(aerodrome.name),
-        location: point(aerodrome.geometry.coordinates),
+        coords: aerodrome.geometry.coordinates,
         elevation,
         declination: aerodrome.magneticDeclination,
         runways,
