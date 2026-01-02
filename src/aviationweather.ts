@@ -62,6 +62,28 @@ async function baseApi(
 }
 
 /**
+ * Get date parameter for recent dates within a specified range.
+ *
+ * @param date - The date to validate and format.
+ * @param days - The number of days in the recent range (default is 30).
+ * @returns Formatted date parameter string or empty string if no date provided.
+ * @throws Will throw an error if the date is outside the recent range.
+ */
+const getRecentDateParam = (date?: Date, days: number = 30): string => {
+  if (!date) { return '' };
+
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(now.getDate() - days);
+
+  if (date < thirtyDaysAgo || date > now) {
+    throw new Error(`Date must be within the last ${days} days`);
+  }
+
+  return `&date=${date.toISOString()}`;
+};
+
+/**
  * Get METAR information for specific ICAO codes.
  *
  * @param icao - Array of ICAO airport codes.
@@ -70,10 +92,9 @@ async function baseApi(
  */
 export async function getMetarStationsByIcao(icao: ICAO[], date?: Date, options: MetarOptions = {}): Promise<MetarStation[]> {
   const { fetcher = fetch } = options;
-  if (!icao.length) {
-    return Promise.resolve([]);
-  }
-  const dateParam = date ? `&date=${date.toISOString()}` : '';
+  if (!icao.length) { return Promise.resolve([]); }
+
+  const dateParam = getRecentDateParam(date);
   return baseApi(`metar?ids=${icao.map(normalizeICAO).join(',')}&format=json&taf=true${dateParam}`, {}, fetcher);
 }
 
@@ -92,7 +113,8 @@ export async function getMetarStationsByBbox(bbox: GeoJSON.BBox, date?: Date, op
     parseFloat(bbox[3].toFixed(2)), // north
     parseFloat(bbox[2].toFixed(2))  // east
   ];
-  const dateParam = date ? `&date=${date.toISOString()}` : '';
+
+  const dateParam = getRecentDateParam(date);
   return baseApi(`metar?bbox=${bboxReversed.join(',')}&format=json&taf=true${dateParam}`, {}, fetcher);
 }
 
