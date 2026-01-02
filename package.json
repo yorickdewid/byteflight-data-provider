@@ -9,6 +9,11 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "flight-planner"
+    ]
+  },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
