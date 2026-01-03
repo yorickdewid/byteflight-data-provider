@@ -41,12 +41,12 @@ async function baseApi(
   try {
     const response = await fetchApi(fetcher, `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions);
     if (response.status === 204) {
-      throw new Error('No content returned from API');
+      throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, 'No Content');
     }
 
     if (!response.ok) {
       await response.body?.cancel();
-      throw new Error(`Request failed with status: ${response.status}`);
+      throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
     }
 
     const data = await response.json() as unknown[];
