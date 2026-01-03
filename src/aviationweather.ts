@@ -40,6 +40,10 @@ async function baseApi(
 
   try {
     const response = await fetchApi(fetcher, `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions);
+    if (response.status === 204) {
+      throw new Error('No content returned from API');
+    }
+
     if (!response.ok) {
       await response.body?.cancel();
       throw new Error(`Request failed with status: ${response.status}`);
