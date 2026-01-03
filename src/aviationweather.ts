@@ -38,31 +38,27 @@ async function baseApi(
     timeout: AVIATIONWEATHER_API_CONFIG.TIMEOUT
   };
 
-  try {
-    const response = await fetchApi(fetcher, `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions);
-    if (response.status === 204) {
-      throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, 'No Content');
-    }
-
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
-    }
-
-    const data = await response.json() as unknown[];
-    if (!data || data.length === 0) {
-      return [];
-    }
-
-    return data.map((metar: any) => ({
-      station: normalizeICAO(metar.icaoId),
-      metar: createMetarFromString(metar.rawOb),
-      tafRaw: metar.rawTaf,
-      coords: [metar.lon, metar.lat]
-    }));
-  } catch (error) {
-    throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, error);
+  const response = await fetchApi(fetcher, `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions);
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new ApiError('METAR', `${AVIATIONWEATHER_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
   }
+
+  if (response.status === 204) {
+    return [];
+  }
+
+  const data = await response.json() as unknown[];
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  return data.map((metar: any) => ({
+    station: normalizeICAO(metar.icaoId),
+    metar: createMetarFromString(metar.rawOb),
+    tafRaw: metar.rawTaf,
+    coords: [metar.lon, metar.lat]
+  }));
 }
 
 /**

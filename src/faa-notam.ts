@@ -258,23 +258,19 @@ async function baseApiRaw(
     timeout: FAA_API_CONFIG.TIMEOUT
   };
 
-  try {
-    const response = await fetchApi(fetcher, `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions);
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new Error(`Request failed with status: ${response.status}`);
-    }
-
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const body = await response.text();
-      throw new Error(`Returned non-JSON response: ${contentType}, body: ${body}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw new ApiError('FAA NOTAM', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, error);
+  const response = await fetchApi(fetcher, `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions);
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new ApiError('FAA NOTAM', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
   }
+
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const body = await response.text();
+    throw new ApiError('FAA NOTAM', `${FAA_API_CONFIG.API_URL}${uri}`, apiOptions, `Returned non-JSON response: ${contentType}, body: ${body}`);
+  }
+
+  return await response.json();
 }
 
 /**

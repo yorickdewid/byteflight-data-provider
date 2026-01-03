@@ -55,57 +55,53 @@ async function baseApi(
     timeout: OPENAIP_API_CONFIG.TIMEOUT
   };
 
-  try {
-    const response = await fetchApi(fetcher, `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions);
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new Error(`Request failed with status: ${response.status}`);
-    }
-
-    const data = await response.json() as any;
-    if (!data || !data.items || data.items.length === 0) {
-      return [];
-    }
-
-    // FUTURE: This excludes any aerodromes without an ICAO code
-    return data.items.filter((aerodrome: any) => aerodrome.icaoCode && isICAO(aerodrome.icaoCode)).map((aerodrome: any) => {
-      const runways = Array.isArray(aerodrome.runways) ? aerodrome.runways.map((runway: any) => {
-        return {
-          designator: runway.designator, // TODO: Validate using regex
-          heading: runway.trueHeading, // TODO: between 0 and 360
-          length: runway.dimension?.length.unit === 0 ? runway.dimension?.length.value : undefined,
-          width: runway.dimension?.width.unit === 0 ? runway.dimension?.width.value : undefined,
-          surface: runway.surface.mainComposite,
-        };
-      }) as Runway[] : [];
-
-      const frequencies = Array.isArray(aerodrome.frequencies) ? aerodrome.frequencies.map((frequency: any) => {
-        return {
-          type: validateFrequencyType(frequency.type),
-          name: frequency.name || '',
-          value: frequency.value,
-        };
-      }) as Frequency[] : [];
-
-      // TODO: Hand this off the FlightPlanner
-      const elevation = (aerodrome.elevation && aerodrome.elevation.unit === 0 && aerodrome.elevation.referenceDatum === 1) ? aerodrome.elevation.value * OPENAIP_API_CONFIG.METERS_TO_FEET : undefined;
-
-      return {
-        icao: normalizeICAO(aerodrome.icaoCode),
-        iata: aerodrome.iataCode ? normalizeIATA(aerodrome.iataCode) : undefined,
-        name: capitalizeWords(aerodrome.name),
-        coords: aerodrome.geometry.coordinates,
-        elevation,
-        declination: aerodrome.magneticDeclination,
-        runways,
-        frequencies,
-        ppr: aerodrome.ppr,
-        waypointVariant: WaypointVariant.Aerodrome
-      };
-    });
-  } catch (error) {
-    throw new ApiError('OpenAIP', `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions, error);
+  const response = await fetchApi(fetcher, `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions);
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new ApiError('OpenAIP', `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
   }
+
+  const data = await response.json() as any;
+  if (!data || !data.items || data.items.length === 0) {
+    return [];
+  }
+
+  // FUTURE: This excludes any aerodromes without an ICAO code
+  return data.items.filter((aerodrome: any) => aerodrome.icaoCode && isICAO(aerodrome.icaoCode)).map((aerodrome: any) => {
+    const runways = Array.isArray(aerodrome.runways) ? aerodrome.runways.map((runway: any) => {
+      return {
+        designator: runway.designator, // TODO: Validate using regex
+        heading: runway.trueHeading, // TODO: between 0 and 360
+        length: runway.dimension?.length.unit === 0 ? runway.dimension?.length.value : undefined,
+        width: runway.dimension?.width.unit === 0 ? runway.dimension?.width.value : undefined,
+        surface: runway.surface.mainComposite,
+      };
+    }) as Runway[] : [];
+
+    const frequencies = Array.isArray(aerodrome.frequencies) ? aerodrome.frequencies.map((frequency: any) => {
+      return {
+        type: validateFrequencyType(frequency.type),
+        name: frequency.name || '',
+        value: frequency.value,
+      };
+    }) as Frequency[] : [];
+
+    // TODO: Hand this off the FlightPlanner
+    const elevation = (aerodrome.elevation && aerodrome.elevation.unit === 0 && aerodrome.elevation.referenceDatum === 1) ? aerodrome.elevation.value * OPENAIP_API_CONFIG.METERS_TO_FEET : undefined;
+
+    return {
+      icao: normalizeICAO(aerodrome.icaoCode),
+      iata: aerodrome.iataCode ? normalizeIATA(aerodrome.iataCode) : undefined,
+      name: capitalizeWords(aerodrome.name),
+      coords: aerodrome.geometry.coordinates,
+      elevation,
+      declination: aerodrome.magneticDeclination,
+      runways,
+      frequencies,
+      ppr: aerodrome.ppr,
+      waypointVariant: WaypointVariant.Aerodrome
+    };
+  });
 }
 
 /**
