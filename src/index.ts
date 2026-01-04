@@ -17,7 +17,7 @@ export {
   getAerodromeByIcao,
   getAerodromeByRadius,
   type OpenAipOptions
-} from "./openaip.js";
+} from "./aerodrome.js";
 
 export {
   ApiError
