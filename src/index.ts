@@ -20,6 +20,11 @@ export {
 } from "./aerodrome.js";
 
 export {
+  default as navaidProvider,
+  getNavaidByIcao,
+} from "./navaid.js";
+
+export {
   ApiError
 } from "./error.js";
 

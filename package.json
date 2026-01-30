@@ -34,8 +34,12 @@
       "types": "./dist/aviationweather.d.ts"
     },
     "./aerodrome": {
-      "import": "./dist/openaip.js",
-      "types": "./dist/openaip.d.ts"
+      "import": "./dist/aerodrome.js",
+      "types": "./dist/aerodrome.d.ts"
+    },
+    "./navaid": {
+      "import": "./dist/navaid.js",
+      "types": "./dist/navaid.d.ts"
     },
     "./notam": {
       "import": "./dist/faa-notam.js",
