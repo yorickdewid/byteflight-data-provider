@@ -1,6 +1,5 @@
-import { validateFrequencyType, WaypointVariant, type Aerodrome, type Frequency } from "flight-planner";
+import { type Aerodrome } from "flight-planner";
 import { fetchApi, type FetchFunction } from "./http.js";
-import { capitalizeWords } from "flight-planner/utils";
 import { ApiError } from "./error.js";
 
 const OPENAIP_API_CONFIG = {
@@ -64,9 +63,21 @@ async function baseApi(
     return [];
   }
 
-  return data.items.filter((navaid: any) => navaid.identifier).map((navaid: any) => {
-    console.log(navaid);
-  });
+  // Map OpenAIP navaid to Aerodrome structure (best effort)
+  return data.items
+    .filter((navaid: any) => navaid.identifier)
+    .map((navaid: any) => ({
+      icao: navaid.identifier,
+      name: navaid.name || navaid.identifier,
+      coords: navaid.geometry.coordinates, // [lon, lat]
+      elevation: navaid.elevation?.value || 0,
+      runways: [], // Navaids don't have runways
+      frequencies: navaid.frequency ? [{
+        type: 'NAV', // Generic NAV type
+        frequency: navaid.frequency.value,
+        name: navaid.name
+      }] : [],
+    } as unknown as Aerodrome));
 }
 
 /**
