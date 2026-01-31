@@ -15,6 +15,7 @@ export {
 export {
   default as aerodromeProvider,
   getAerodromeByIcao,
+  getAerodromeByIata,
   getAerodromeByRadius,
   type OpenAipOptions
 } from "./aerodrome.js";

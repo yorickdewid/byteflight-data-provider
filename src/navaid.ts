@@ -1,19 +1,7 @@
 import { type Aerodrome } from "flight-planner";
 import { fetchApi, type FetchFunction } from "./http.js";
 import { ApiError } from "./error.js";
-
-const OPENAIP_API_CONFIG = {
-  API_URL: 'https://api.core.openaip.net/api/',
-  CACHE_TTL: 3600 * 24 * 7, // 1 week for airport data
-  TIMEOUT: 10000, // 10 seconds
-  SEARCH_LIMIT: 1,
-  RADIUS_LIMIT: 200,
-  DEFAULT_RADIUS_KM: 50,
-  COORDINATE_PRECISION: 2,
-  METERS_TO_FEET: 3.28084,
-  KM_TO_METERS: 1_000,
-  AIRPORT_TYPES: [0, 1, 2, 3, 9, 5]
-} as const;
+import { OPENAIP_API_CONFIG, type OpenAipNavaidItem, type OpenAipResponse } from "./openaip-config.js";
 
 export interface OpenAipOptions {
   apiKey: string;
@@ -25,13 +13,13 @@ export interface NavaidProvider {
 }
 
 /**
- * Base API function for fetching OpenAIP data.
+ * Base API function for fetching OpenAIP navaid data.
  *
  * @param uri - The URI path to append to the base URL.
  * @param apiKey - The OpenAIP API key for authentication.
  * @param options - Additional fetch options.
  * @param fetcher - Custom fetch function (defaults to global fetch).
- * @returns Promise resolving to an array of navaid objects.
+ * @returns Promise resolving to an array of navaid objects (mapped to Aerodrome structure until Navaid type is available).
  * @throws Will throw an error if the API request fails.
  */
 async function baseApi(
@@ -58,15 +46,15 @@ async function baseApi(
     throw new ApiError('OpenAIP', `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
   }
 
-  const data = await response.json() as any;
+  const data = await response.json() as OpenAipResponse<OpenAipNavaidItem>;
   if (!data || !data.items || data.items.length === 0) {
     return [];
   }
 
   // Map OpenAIP navaid to Aerodrome structure (best effort)
   return data.items
-    .filter((navaid: any) => navaid.identifier)
-    .map((navaid: any) => ({
+    .filter((navaid) => navaid.identifier)
+    .map((navaid) => ({
       icao: navaid.identifier,
       name: navaid.name || navaid.identifier,
       coords: navaid.geometry.coordinates, // [lon, lat]
@@ -88,7 +76,7 @@ async function baseApi(
  */
 export async function getNavaidByIcao(identifier: string, options: OpenAipOptions): Promise<Aerodrome[]> {
   const { fetcher = fetch, apiKey } = options;
-  return baseApi(`navaids?search=${identifier}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
+  return baseApi(`navaids?search=${encodeURIComponent(identifier)}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
 }
 
 /**

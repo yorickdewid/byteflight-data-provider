@@ -19,12 +19,11 @@ export interface NotamProvider {
   getRawByTransactionId(transactionId: number): Promise<any>;
 }
 
-// TODO: We need to parse timezones properly
 /**
- * Parse NOTAM date format (MM/DD/YYYY HHMM) to Date object
+ * Parse NOTAM date format (MM/DD/YYYY HHMM) to Date object in UTC
  *
- * @param dateString - Date string in format "09/11/2025 1707"
- * @returns Parsed Date object or undefined if invalid
+ * @param dateString - Date string in format "09/11/2025 1707" (assumed UTC)
+ * @returns Parsed Date object in UTC or undefined if invalid
  */
 function parseNotamDate(dateString: string): Date | undefined {
   if (!dateString) {
@@ -41,13 +40,13 @@ function parseNotamDate(dateString: string): Date | undefined {
   const hours = parseInt(time.substring(0, 2), 10);
   const minutes = parseInt(time.substring(2, 4), 10);
 
-  return new Date(
+  return new Date(Date.UTC(
     parseInt(year, 10),
     parseInt(month, 10) - 1, // Month is 0-indexed
     parseInt(day, 10),
     hours,
     minutes
-  );
+  ));
 }
 
 /**
@@ -115,91 +114,91 @@ function parseText(text: string): string {
 
   const abbreviations: Record<string, string> = {
     // Airport/Airfield
-    'AD': 'aerodrome',
-    'AFTN': 'aeronautical fixed telecommunication network',
-    'AGL': 'above ground level',
-    'AMSL': 'above mean sea level',
-    'APCH': 'approach',
-    'APT': 'airport',
-    'ARPT': 'airport',
+    'AD': 'AERODROME',
+    'AFTN': 'AERONAUTICAL FIXED TELECOMMUNICATION NETWORK',
+    'AGL': 'ABOVE GROUND LEVEL',
+    'AMSL': 'ABOVE MEAN SEA LEVEL',
+    'APCH': 'APPROACH',
+    'APT': 'AIRPORT',
+    'ARPT': 'AIRPORT',
 
     // Air Traffic Control
-    'TWR': 'tower',
-    'GND': 'ground',
-    'APP': 'approach',
-    'DEP': 'departure',
+    'TWR': 'TOWER',
+    'GND': 'GROUND',
+    'APP': 'APPROACH',
+    'DEP': 'DEPARTURE',
 
     // Runway/Taxiway
-    'RWY': 'runway',
-    'TWY': 'taxiway',
-    'TKOF': 'takeoff',
-    'LDG': 'landing',
-    'CLSD': 'closed',
-    'AVBL': 'available',
-    'REQ': 'request',
-    'BTN': 'between',
+    'RWY': 'RUNWAY',
+    'TWY': 'TAXIWAY',
+    'TKOF': 'TAKEOFF',
+    'LDG': 'LANDING',
+    'CLSD': 'CLOSED',
+    'AVBL': 'AVAILABLE',
+    'REQ': 'REQUEST',
+    'BTN': 'BETWEEN',
 
     // Time/Duration
-    'LCL': 'local',
-    'FM': 'from',
-    'TIL': 'until',
-    'PERM': 'permanent',
-    'TEMP': 'temporary',
-    'DLY': 'daily',
-    'WEF': 'with effect from',
-    'APPX': 'approximately',
+    'LCL': 'LOCAL',
+    'FM': 'FROM',
+    'TIL': 'UNTIL',
+    'PERM': 'PERMANENT',
+    'TEMP': 'TEMPORARY',
+    'DLY': 'DAILY',
+    'WEF': 'WITH EFFECT FROM',
+    'APPX': 'APPROXIMATELY',
 
     // Weather/Conditions
-    'WX': 'weather',
-    'VIS': 'visibility',
-    'OBSCN': 'obscuration',
-    'FG': 'fog',
-    'BR': 'mist',
-    'RA': 'rain',
-    'SN': 'snow',
-    'TS': 'thunderstorm',
+    'WX': 'WEATHER',
+    'VIS': 'VISIBILITY',
+    'OBSCN': 'OBSCURATION',
+    'FG': 'FOG',
+    'BR': 'MIST',
+    'RA': 'RAIN',
+    'SN': 'SNOW',
+    'TS': 'THUNDERSTORM',
 
     // Operations
-    'OPR': 'operate/operating',
-    'OPNL': 'operational',
-    'INOP': 'inoperative',
-    'U/S': 'unserviceable',
-    'MAINT': 'maintenance',
-    'CONST': 'construction',
-    'WIP': 'work in progress',
-    'OBST': 'obstacle',
+    'OPR': 'OPERATE/OPERATING',
+    'OPNL': 'OPERATIONAL',
+    'INOP': 'INOPERATIVE',
+    'U/S': 'UNSERVICEABLE',
+    'MAINT': 'MAINTENANCE',
+    'CONST': 'CONSTRUCTION',
+    'WIP': 'WORK IN PROGRESS',
+    'OBST': 'OBSTACLE',
 
     // Equipment/Systems
-    'EQPT': 'equipment',
-    'SYS': 'system',
-    'PWR': 'power',
-    'ELEC': 'electrical',
-    'LGTG': 'lighting',
-    'REIL': 'runway end identifier lights',
-    'LGTD': 'lighted',
+    'EQPT': 'EQUIPMENT',
+    'SYS': 'SYSTEM',
+    'PWR': 'POWER',
+    'ELEC': 'ELECTRICAL',
+    'LGTG': 'LIGHTING',
+    'REIL': 'RUNWAY END IDENTIFIER LIGHTS',
+    'LGTD': 'LIGHTED',
 
     // Military/Restricted
-    'MIL': 'military',
+    'MIL': 'MILITARY',
 
     // Common operational terms
-    'ACFT': 'aircraft',
-    'ALT': 'altitude',
-    'FL': 'flight level',
-    'FT': 'feet',
-    'NM': 'nautical miles',
-    'KT': 'knots',
-    'DEG': 'degrees',
-    'MAG': 'magnetic',
-    'TRUE': 'true',
-    'VAR': 'variation',
+    'ACFT': 'AIRCRAFT',
+    'ALT': 'ALTITUDE',
+    'FL': 'FLIGHT LEVEL',
+    'FT': 'FEET',
+    'NM': 'NAUTICAL MILES',
+    'KT': 'KNOTS',
+    'DEG': 'DEGREES',
+    'MAG': 'MAGNETIC',
+    'TRUE': 'TRUE',
+    'VAR': 'VARIATION',
 
     // Communications
-    'FREQ': 'frequency',
-    'MHZ': 'megahertz',
-    'KHZ': 'kilohertz',
-    'COM': 'communication',
-    'RAD': 'radio',
-    'TEL': 'telephone'
+    'FREQ': 'FREQUENCY',
+    'MHZ': 'MEGAHERTZ',
+    'KHZ': 'KILOHERTZ',
+    'COM': 'COMMUNICATION',
+    'RAD': 'RADIO',
+    'TEL': 'TELEPHONE'
   };
 
   for (const [abbrev, expansion] of Object.entries(abbreviations)) {

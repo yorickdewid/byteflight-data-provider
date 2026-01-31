@@ -2,19 +2,7 @@ import { isICAO, normalizeIATA, normalizeICAO, validateFrequencyType, WaypointVa
 import { fetchApi, type FetchFunction } from "./http.js";
 import { capitalizeWords } from "flight-planner/utils";
 import { ApiError } from "./error.js";
-
-const OPENAIP_API_CONFIG = {
-  API_URL: 'https://api.core.openaip.net/api/',
-  CACHE_TTL: 3600 * 24 * 7, // 1 week for airport data
-  TIMEOUT: 10000, // 10 seconds
-  SEARCH_LIMIT: 1,
-  RADIUS_LIMIT: 200,
-  DEFAULT_RADIUS_KM: 50,
-  COORDINATE_PRECISION: 2,
-  METERS_TO_FEET: 3.28084,
-  KM_TO_METERS: 1_000,
-  AIRPORT_TYPES: [0, 1, 2, 3, 9, 5]
-} as const;
+import { OPENAIP_API_CONFIG, type OpenAipAirportItem, type OpenAipResponse } from "./openaip-config.js";
 
 export interface OpenAipOptions {
   apiKey: string;
@@ -61,13 +49,13 @@ async function baseApi(
     throw new ApiError('OpenAIP', `${OPENAIP_API_CONFIG.API_URL}${uri}`, apiOptions, `HTTP ${response.status} - ${response.statusText}`);
   }
 
-  const data = await response.json() as any;
+  const data = await response.json() as OpenAipResponse<OpenAipAirportItem>;
   if (!data || !data.items || data.items.length === 0) {
     return [];
   }
 
   // FUTURE: This excludes any aerodromes without an ICAO code
-  return data.items.filter((aerodrome: any) => aerodrome.icaoCode && isICAO(aerodrome.icaoCode)).map((aerodrome: any) => {
+  return data.items.filter((aerodrome) => aerodrome.icaoCode && isICAO(aerodrome.icaoCode)).map((aerodrome) => {
     const runways = Array.isArray(aerodrome.runways) ? aerodrome.runways.map((runway: any) => {
       return {
         designator: runway.designator, // TODO: Validate using regex
@@ -112,7 +100,7 @@ async function baseApi(
  */
 export async function getAerodromeByIcao(icao: ICAO, options: OpenAipOptions): Promise<Aerodrome[]> {
   const { fetcher = fetch, apiKey } = options;
-  return baseApi(`airports?search=${icao}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
+  return baseApi(`airports?search=${encodeURIComponent(icao)}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
 }
 
 /**
@@ -123,7 +111,7 @@ export async function getAerodromeByIcao(icao: ICAO, options: OpenAipOptions): P
  */
 export async function getAerodromeByIata(iata: string, options: OpenAipOptions): Promise<Aerodrome[]> {
   const { fetcher = fetch, apiKey } = options;
-  return baseApi(`airports?search=${iata}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
+  return baseApi(`airports?search=${encodeURIComponent(iata)}&limit=${OPENAIP_API_CONFIG.SEARCH_LIMIT}`, apiKey, {}, fetcher);
 }
 
 /**
@@ -139,8 +127,8 @@ export async function getAerodromeByRadius(
   distance: number = OPENAIP_API_CONFIG.DEFAULT_RADIUS_KM,
   options: OpenAipOptions
 ): Promise<Aerodrome[]> {
-  if (distance < 0) {
-    throw new Error("Distance must be greater than 0");
+  if (distance <= 0) {
+    throw new Error("Distance must be a positive number");
   }
   if (location.length !== 2) {
     throw new Error("Location must be a 2D coordinate");
