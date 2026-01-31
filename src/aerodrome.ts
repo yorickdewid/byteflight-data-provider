@@ -78,7 +78,7 @@ async function baseApi(
     const elevation = (aerodrome.elevation && aerodrome.elevation.unit === 0 && aerodrome.elevation.referenceDatum === 1) ? aerodrome.elevation.value * OPENAIP_API_CONFIG.METERS_TO_FEET : undefined;
 
     return {
-      icao: normalizeICAO(aerodrome.icaoCode),
+      icao: aerodrome.icaoCode ? normalizeICAO(aerodrome.icaoCode) : undefined,
       iata: aerodrome.iataCode ? normalizeIATA(aerodrome.iataCode) : undefined,
       name: capitalizeWords(aerodrome.name),
       coords: aerodrome.geometry.coordinates,
