@@ -4,7 +4,6 @@ import { ApiError } from "./error.js";
 
 const AVIATIONWEATHER_API_CONFIG = {
   API_URL: 'https://aviationweather.gov/api/data/',
-  CACHE_TTL: 60, // 1 minute for weather data
   TIMEOUT: 5000, // 5 seconds
 } as const;
 
@@ -29,12 +28,12 @@ async function baseApi(
   options: RequestInit = {},
   fetcher: FetchFunction = fetch
 ): Promise<MetarStation[]> {
-  const apiOptions: RequestInit & { timeout?: number; cf?: object } = {
+  // No edge caching (cf.cacheEverything) here: aviationweather.gov serves
+  // empty 200 bodies while degraded, and caching those replays the outage
+  // for the TTL — a nav log computed from a cached empty station list
+  // silently loses legs. METAR is too volatile to cache anyway.
+  const apiOptions: RequestInit & { timeout?: number } = {
     ...options,
-    cf: {
-      cacheTtl: AVIATIONWEATHER_API_CONFIG.CACHE_TTL,
-      cacheEverything: true,
-    },
     timeout: AVIATIONWEATHER_API_CONFIG.TIMEOUT
   };
 
