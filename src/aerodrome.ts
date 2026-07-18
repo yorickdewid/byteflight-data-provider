@@ -118,7 +118,7 @@ export async function getAerodromeByIata(iata: string, options: OpenAipOptions):
  * Get aerodrome information for airports within a radius from a location.
  *
  * @param location - GeoJSON Position [longitude, latitude].
- * @param distance - Distance in kilometers (default: 50).
+ * @param distance - Distance in kilometers (default: 50, capped at 50 — OpenAIP's maximum).
  * @returns Promise resolving to an array of Aerodrome objects.
  * @throws Will throw an error if distance is negative or location format is invalid.
  */
@@ -137,7 +137,7 @@ export async function getAerodromeByRadius(
   const { fetcher = fetch, apiKey } = options;
 
   // TODO: Move this somewhere else
-  const distanceInMeters = distance * OPENAIP_API_CONFIG.KM_TO_METERS;
+  const distanceInMeters = Math.min(distance, OPENAIP_API_CONFIG.MAX_RADIUS_KM) * OPENAIP_API_CONFIG.KM_TO_METERS;
   const lat = parseFloat(location[1].toFixed(OPENAIP_API_CONFIG.COORDINATE_PRECISION));
   const lon = parseFloat(location[0].toFixed(OPENAIP_API_CONFIG.COORDINATE_PRECISION));
 
