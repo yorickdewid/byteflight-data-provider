@@ -13,7 +13,7 @@ importers:
         version: 7.4.0
       flight-planner:
         specifier: github:yorickdewid/flight-planner
-        version: https://codeload.github.com/yorickdewid/flight-planner/tar.gz/5c1895a3fc8999d6144d6dba9360f141c0f8af48
+        version: https://codeload.github.com/yorickdewid/flight-planner/tar.gz/210b3a27b5960227dee78587c08cbf9afeafeff9
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.5
@@ -705,8 +705,8 @@ packages:
   flatted@3.4.4:
     resolution: {integrity: sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q==}
 
-  flight-planner@https://codeload.github.com/yorickdewid/flight-planner/tar.gz/5c1895a3fc8999d6144d6dba9360f141c0f8af48:
-    resolution: {tarball: https://codeload.github.com/yorickdewid/flight-planner/tar.gz/5c1895a3fc8999d6144d6dba9360f141c0f8af48}
+  flight-planner@https://codeload.github.com/yorickdewid/flight-planner/tar.gz/210b3a27b5960227dee78587c08cbf9afeafeff9:
+    resolution: {tarball: https://codeload.github.com/yorickdewid/flight-planner/tar.gz/210b3a27b5960227dee78587c08cbf9afeafeff9}
     version: 2.2.0
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
@@ -2507,9 +2507,8 @@ snapshots:
 
   flatted@3.4.4: {}
 
-  flight-planner@https://codeload.github.com/yorickdewid/flight-planner/tar.gz/5c1895a3fc8999d6144d6dba9360f141c0f8af48:
+  flight-planner@https://codeload.github.com/yorickdewid/flight-planner/tar.gz/210b3a27b5960227dee78587c08cbf9afeafeff9:
     dependencies:
-      '@turf/helpers': 7.4.0
       '@turf/turf': 7.4.0
       convert-units: 2.3.4
       metar-taf-parser: 9.1.3
