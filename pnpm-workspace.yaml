@@ -1,0 +1,5 @@
+packages:
+  - .
+
+allowBuilds:
+  "flight-planner@https://codeload.github.com/yorickdewid/flight-planner/tar.gz/210b3a27b5960227dee78587c08cbf9afeafeff9": true
